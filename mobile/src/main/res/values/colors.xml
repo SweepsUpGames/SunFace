@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#333333</color>
+    <color name="sun">#ead61c</color>
+    <color name="moon">#E6E4E1</color>
+    <color name="night_dark">#2B3D50</color>
+    <color name="night_light">#1B3245</color>
+</resources>
