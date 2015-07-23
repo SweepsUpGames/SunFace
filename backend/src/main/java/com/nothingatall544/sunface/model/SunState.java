@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 /**
- * todo add colors to states
  * Created by derp on 7/21/2015.
  */
 public enum SunState {

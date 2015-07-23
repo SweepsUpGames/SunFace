@@ -1,6 +1,7 @@
 package com.nothingatall544.sunface.model;
 
 import android.text.format.Time;
+import android.util.Log;
 
 /**
  * Created by derp on 7/21/2015.
@@ -23,11 +24,15 @@ public class SunFaceModel implements iSunFaceModel {
     }
 
     @Override
-    public double getFillPercent() {
+    public float getFillPercent() {
         return calcPercent(mTime.minute);
     }
 
-    private double calcPercent(int minute){
-        return ((minute % 30) / 30.0);
+    private float calcPercent(int minute){
+        //todo 30 minutes is not the max time, 3 hours is.  Scale based on that
+        final int time = (minute % 30);
+        final float percent = ((minute % 30) / 30.0f);
+        Log.d("SunFace", String.format("minute %d, time %d, percent %f", minute, time, percent));
+        return ((minute % 30) / 30.0f);
     }
 }

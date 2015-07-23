@@ -8,5 +8,5 @@ import com.nothingatall544.sunface.model.SunState;
  * Created by derp on 7/21/2015.
  */
 public interface iSunFace {
-    public void setState(@NonNull SunState sunState, double percent);
+    public void setState(@NonNull SunState sunState, float percent);
 }

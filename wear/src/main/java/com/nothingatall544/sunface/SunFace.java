@@ -16,6 +16,7 @@
 
 package com.nothingatall544.sunface;
 
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -39,12 +40,21 @@ public class SunFace extends CanvasWatchFaceService {
         private double mPercent;
 
         private Paint mBackground;
+        private Paint mSun;
+        private Paint mDusk;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
             mPresenter = new SunPresenter();
-            mBackground = new Paint(R.color.background);
+            Resources r = getResources();
+            mBackground = new Paint();
+            mBackground.setColor(r.getColor(R.color.background));
+            mSun = new Paint();
+            mSun.setColor(r.getColor(R.color.sun));
+            mDusk = new Paint();
+            mDusk.setColor(r.getColor(R.color.moon));
+
         }
 
         @Override
@@ -62,14 +72,21 @@ public class SunFace extends CanvasWatchFaceService {
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             //todo draw the watch face
+            final float midpoint = bounds.width()/2;
+            final float drawDistance = (float)(midpoint * mPercent);
+
             canvas.drawRect(bounds, mBackground);
             // left half
+            canvas.drawArc(0, 0, bounds.right, bounds.bottom, 270, 180, true, mDusk);
+            canvas.drawArc(0, 0, bounds.right, bounds.bottom, 90, 180, true, mSun);
             // right half
             // top oval
+
+            canvas.drawOval((midpoint - drawDistance), 0, (midpoint + drawDistance), bounds.bottom, mSun);
         }
 
         @Override
-        public void setState(@NonNull SunState sunState, double percent) {
+        public void setState(@NonNull SunState sunState, float percent) {
             mSunState = sunState;
             mPercent = percent;
             invalidate();
