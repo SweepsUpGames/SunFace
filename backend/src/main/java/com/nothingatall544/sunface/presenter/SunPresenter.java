@@ -1,7 +1,6 @@
 package com.nothingatall544.sunface.presenter;
 
 import android.support.annotation.NonNull;
-import android.text.format.Time;
 
 import com.google.common.base.Preconditions;
 import com.nothingatall544.sunface.model.SunFaceModel;
@@ -29,6 +28,7 @@ public class SunPresenter {
     }
 
     public void updateSunFace(){
+        mSunFaceModel.syncTime();
         final SunState sunState = mSunFaceModel.getSunState();
         final double fillPercent = mSunFaceModel.getFillPercent();
         if (mSunFace != null) {

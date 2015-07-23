@@ -17,6 +17,7 @@
 package com.nothingatall544.sunface;
 
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.wearable.watchface.CanvasWatchFaceService;
@@ -26,10 +27,6 @@ import com.nothingatall544.sunface.model.SunState;
 import com.nothingatall544.sunface.presenter.SunPresenter;
 import com.nothingatall544.sunface.view.iSunFace;
 
-/**
- * Analog watch face with a ticking second hand. In ambient mode, the second hand isn't shown. On
- * devices with low-bit ambient mode, the hands are drawn without anti-aliasing in ambient mode.
- */
 public class SunFace extends CanvasWatchFaceService {
     @Override
     public Engine onCreateEngine() {
@@ -41,10 +38,13 @@ public class SunFace extends CanvasWatchFaceService {
         private SunState mSunState;
         private double mPercent;
 
+        private Paint mBackground;
+
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
             mPresenter = new SunPresenter();
+            mBackground = new Paint(R.color.background);
         }
 
         @Override
@@ -62,7 +62,7 @@ public class SunFace extends CanvasWatchFaceService {
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             //todo draw the watch face
-            // background
+            canvas.drawRect(bounds, mBackground);
             // left half
             // right half
             // top oval

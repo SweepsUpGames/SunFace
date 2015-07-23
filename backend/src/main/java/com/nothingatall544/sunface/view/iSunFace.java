@@ -4,8 +4,6 @@ import android.support.annotation.NonNull;
 
 import com.nothingatall544.sunface.model.SunState;
 
-import java.util.Map;
-
 /**
  * Created by derp on 7/21/2015.
  */
