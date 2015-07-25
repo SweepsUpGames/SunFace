@@ -4,5 +4,5 @@
     <color name="sun">#ead61c</color>
     <color name="moon">#E6E4E1</color>
     <color name="night_dark">#2B3D50</color>
-    <color name="night_light">#1B3245</color>
+    <color name="night_light">#ff453607</color>
 </resources>

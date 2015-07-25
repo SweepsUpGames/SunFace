@@ -3,36 +3,45 @@ package com.nothingatall544.sunface.model;
 import android.text.format.Time;
 import android.util.Log;
 
+import java.util.Calendar;
+import java.util.TimeZone;
+
 /**
  * Created by derp on 7/21/2015.
  */
 public class SunFaceModel implements iSunFaceModel {
-    private final Time mTime;
+    private Calendar mCalendar;
 
-    public SunFaceModel(){
-        mTime = new Time();
-    }
+    private int mHour;
+    private int mMinute;
 
     @Override
     public void syncTime() {
-        mTime.setToNow();
+        mCalendar = Calendar.getInstance();
+        mCalendar.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"));
+        mHour = mCalendar.get(Calendar.HOUR_OF_DAY);
+        mMinute = mCalendar.get(Calendar.MINUTE);
+        Log.d("SunFace", String.format("Time %d:%d", mHour, mMinute));
     }
 
     @Override
     public SunState getSunState() {
-        return SunState.getSunState(mTime.hour);
+        return SunState.getSunState(mHour);
     }
 
     @Override
     public float getFillPercent() {
-        return calcPercent(mTime.minute);
+        return calcPercent(mHour, mMinute);
     }
 
-    private float calcPercent(int minute){
-        //todo 30 minutes is not the max time, 3 hours is.  Scale based on that
-        final int time = (minute % 30);
-        final float percent = ((minute % 30) / 30.0f);
+    private float calcPercent(int hour, int minute){
+        final int scaledHour = hour % 3;
+        final int time = ((scaledHour * 60) + minute);
+        final float percent = (time / 180.0f);
         Log.d("SunFace", String.format("minute %d, time %d, percent %f", minute, time, percent));
-        return ((minute % 30) / 30.0f);
+        if ((hour % 6) < 3){
+            return 1 - percent;
+        }
+        return percent;
     }
 }
