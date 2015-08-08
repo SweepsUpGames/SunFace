@@ -18,7 +18,6 @@ public class SunFaceModel implements iSunFaceModel {
     @Override
     public void syncTime() {
         mCalendar = Calendar.getInstance();
-        mCalendar.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"));
         mHour = mCalendar.get(Calendar.HOUR_OF_DAY);
         mMinute = mCalendar.get(Calendar.MINUTE);
         Log.d("SunFace", String.format("Time %d:%d", mHour, mMinute));
