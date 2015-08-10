@@ -20,12 +20,13 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.support.annotation.NonNull;
 import android.support.wearable.watchface.CanvasWatchFaceService;
-import android.util.Log;
 import android.view.SurfaceHolder;
 
 import com.google.common.collect.ImmutableMap;
+import com.nothingatall544.sunface.model.ColorPallet;
 import com.nothingatall544.sunface.model.SunState;
 import com.nothingatall544.sunface.presenter.SunPresenter;
 import com.nothingatall544.sunface.view.iSunFace;
@@ -33,53 +34,23 @@ import com.nothingatall544.sunface.view.iSunFace;
 import java.util.Map;
 
 public class SunFace extends CanvasWatchFaceService {
-    private static final Map<SunState, Integer> LEFT_COLOR_MAP =
-            ImmutableMap.<SunState, Integer>builder()
-                    .put(SunState.MIDNIGHT, R.color.night_dark)
-                    .put(SunState.EARLY_MORNING, R.color.night_dark)
-                    .put(SunState.DAWN, R.color.sun)
-                    .put(SunState.MORNING, R.color.sun)
-                    .put(SunState.NOON, R.color.night_light)
-                    .put(SunState.AFTER_NOON, R.color.night_light)
-                    .put(SunState.DUSK, R.color.moon)
-                    .put(SunState.EVENING, R.color.moon)
-                    .build();
-
-    private static final Map<SunState, Integer> RIGHT_COLOR_MAP =
-            ImmutableMap.<SunState, Integer>builder()
-                    .put(SunState.MIDNIGHT, R.color.moon)
-                    .put(SunState.EARLY_MORNING, R.color.moon)
-                    .put(SunState.DAWN, R.color.night_dark)
-                    .put(SunState.MORNING, R.color.night_dark)
-                    .put(SunState.NOON, R.color.sun)
-                    .put(SunState.AFTER_NOON, R.color.sun)
-                    .put(SunState.DUSK, R.color.night_light)
-                    .put(SunState.EVENING, R.color.night_light)
-                    .build();
-
-    private static final Map<SunState, Integer> CENTER_COLOR_MAP =
-            ImmutableMap.<SunState, Integer>builder()
-                    .put(SunState.MIDNIGHT, R.color.moon)
-                    .put(SunState.EARLY_MORNING, R.color.night_dark)
-                    .put(SunState.DAWN, R.color.night_dark)
-                    .put(SunState.MORNING, R.color.sun)
-                    .put(SunState.NOON, R.color.sun)
-                    .put(SunState.AFTER_NOON, R.color.night_light)
-                    .put(SunState.DUSK, R.color.night_light)
-                    .put(SunState.EVENING, R.color.moon)
-                    .build();
-
     @Override
     public Engine onCreateEngine() {
         return new Engine();
     }
 
     private class Engine extends CanvasWatchFaceService.Engine implements iSunFace {
+        private final static boolean USE_CENTER = true;
         private Resources mResources;
         private SunPresenter mPresenter;
-        private SunState mSunState;
-        private double mPercent;
 
+        private RectF mFullBounds;
+
+        private double mPercent = -1.0;
+
+        private Paint mLeftPaint;
+        private Paint mRightPaint;
+        private Paint mMiddlePaint;
         private Paint mBackground;
 
         @Override
@@ -87,6 +58,10 @@ public class SunFace extends CanvasWatchFaceService {
             super.onCreate(holder);
             mPresenter = new SunPresenter();
             mResources = getResources();
+
+            mLeftPaint = new Paint();
+            mRightPaint = new Paint();
+            mMiddlePaint = new Paint();
             mBackground = new Paint();
             mBackground.setColor(mResources.getColor(R.color.background));
         }
@@ -105,39 +80,61 @@ public class SunFace extends CanvasWatchFaceService {
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
-            if(mSunState == null){
-                mPresenter.updateSunFace();
+            if (initialize(bounds)) {
                 return;
             }
-            final float midpoint = bounds.width() / 2;
-            final float drawDistance = (float) (midpoint * mPercent);
+            final RectF middleBounds = getMiddleBounds(bounds);
 
-            canvas.drawRect(bounds, mBackground);
+            // draw background
+            canvas.drawRect(mFullBounds, mBackground);
+
             // left half
-            final Paint leftPaint = new Paint();
-            leftPaint.setColor(mResources.getColor(LEFT_COLOR_MAP.get(mSunState)));
-            canvas.drawArc(0, 0, bounds.right, bounds.bottom, 90, 180, true, leftPaint);
+            canvas.drawArc(mFullBounds, 90, 180, USE_CENTER, mLeftPaint);
+
             // right half
-            final Paint rightPaint = new Paint();
-            rightPaint.setColor(mResources.getColor(RIGHT_COLOR_MAP.get(mSunState)));
-            canvas.drawArc(0, 0, bounds.right, bounds.bottom, 270, 180, true, rightPaint);
+            canvas.drawArc(mFullBounds, 270, 180, USE_CENTER, mRightPaint);
+
             // top oval
-            final Paint centerPaint = new Paint();
-            centerPaint.setColor(mResources.getColor(CENTER_COLOR_MAP.get(mSunState)));
-            canvas.drawOval((midpoint - drawDistance), 0, (midpoint + drawDistance), bounds.bottom, centerPaint);
+            canvas.drawOval(middleBounds, mMiddlePaint);
         }
 
         @Override
         public void setState(@NonNull SunState sunState, float percent) {
-            mSunState = sunState;
             mPercent = percent;
             invalidate();
+        }
+
+        @Override
+        public void setSunColors(ColorPallet colorPallet) {
+            mLeftPaint.setColor(mResources.getColor(colorPallet.getLeftColor()));
+            mRightPaint.setColor(mResources.getColor(colorPallet.getRightColor()));
+            mMiddlePaint.setColor(mResources.getColor(colorPallet.getMiddleColor()));
         }
 
         @Override
         public void onDestroy() {
             super.onDestroy();
             mPresenter.removeSunFace();
+        }
+
+        private boolean initialize(Rect bounds){
+            if (mPercent != -1.0){
+                return false;
+            }
+
+            mFullBounds = new RectF(bounds.left, bounds.top, bounds.right, bounds.bottom);
+            mPresenter.updateSunFace();
+            return true;
+        }
+
+        private RectF getMiddleBounds(Rect bounds){
+            final float midpoint = bounds.width() / 2;
+            final float drawDistance = (float) (midpoint * mPercent);
+            return new RectF(
+                    (midpoint - drawDistance), // left
+                    bounds.top,                // top
+                    (midpoint + drawDistance), // right
+                    bounds.bottom);            // bottom
         }
     }
 }

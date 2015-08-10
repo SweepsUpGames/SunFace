@@ -1,15 +1,13 @@
 package com.nothingatall544.sunface.model;
 
-import android.text.format.Time;
 import android.util.Log;
 
 import java.util.Calendar;
-import java.util.TimeZone;
 
 /**
  * Created by derp on 7/21/2015.
  */
-public class SunFaceModel implements iSunFaceModel {
+public class SunFillModel implements iSunFillModel {
     private Calendar mCalendar;
 
     private int mHour;
